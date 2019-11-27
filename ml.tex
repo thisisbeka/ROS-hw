@@ -1,0 +1,197 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{Introduction to Machine learning}
+\author{Bekpasha Dursunov, BS17-RO }
+\date{November 2019}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{hyperref}
+\usepackage[english]{babel}
+\usepackage{blindtext}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Sharelatex Example},
+    bookmarks=true,
+    pdfpagemode=FullScreen,
+    }
+    
+\begin{document}
+
+\maketitle
+I have tried to implement \href{https://arxiv.org/pdf/1702.08400.pdf}{THIS} paper
+
+\section*{Abstract}
+Unsupervised DA aims at learning a joint distribution of
+images in different domains by using images from the marginal distributions in
+individual domains.Addressing the problem, I make a latent space assumption and propose an unsupervised image-to-image translation framework based on GANs.
+\tableofcontents{}
+
+\section{Introduction}
+When analyzing the image translation problem from a probabilistic modeling perspective, the key
+challenge is to learn a joint distribution of images in different domains. In the unsupervised setting,
+the two sets consist of images from two marginal distributions in two different domains, and the task is
+to infer the joint distribution using these images.
+To this end I make a shared-latent space assumption, which assumes a pair of corresponding images
+in different domains can be mapped to a same latent representation in a shared-latent space.\citep{four} Based on
+the assumption, we propose a UNIT framework that are based on generative adversarial networks
+(GANs) and variational auto-encoders (VAEs). We model each image domain using a VAE-GAN. The
+adversarial training objective interacts with a weight-sharing constraint, which enforces a shared latent space, to generate corresponding images in two domains, while the variational auto-encoders
+relate translated images with input images in the respective domains.
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.4]{architecture}
+\caption{\citep{three}Architecture of UNIT, a mix of GANs and VAEs. \\
+(a) The shared latent space assumption. (b) The proposed framework}
+\label{fig:architecture}
+\end{figure}
+
+
+\section{Model explanation and implementation of DA}
+ The goal of the method is to align source and target features by utilizing the task-specific classifiers as a discriminator in order to consider the relationship between class
+boundaries and target samples.\citep{five}
+ 
+We have access to a labeled source image $x_s$ and a corresponding label $y_s$ drawn from a set of labeled source images
+{$X_s$, $Y_s$}, as well as an unlabeled target image $x_t$ drawn
+from unlabeled target images $X_t$. We train a feature generator network $G$, which takes inputs $x_s$ or $x_t$, and classifier
+networks $F_1$ and $F_2$, which take features from $G$. $F_1$ and
+$F_2$ classify them into $K$ classes, that is, they output a K-dimensional vector of logits. We obtain class probabilities
+by applying the softmax function for the vector. We use
+the notation $p_1(y|x)$, $p_2(y|x)$ to denote the K-dimensional
+probabilistic outputs for input $x$ obtained by $F_1$ and $F_2$ respectively.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.35]{1}
+\caption{\citep{two} Example of two classifiers with an overview of the proposed method. Discrepancy refers to the disagreement between the predictions of two classifiers. \textbf{First}, we can see that the target samples outside the support of the source can be measured
+by two different classifiers. \textbf{Second}, regarding the training procedure, we solve a minimax problem in
+which we find two classifiers that maximize the discrepancy on the target sample, and then generate features that minimize this discrepancy.}
+\label{fig:1}
+\end{figure}
+
+
+\section{Difference from the first submission}
+In the case of first submission I had only simple base line model, which was taken from the \href{https://colab.research.google.com/drive/1oVLY8B5NhT62-_XtqUYWrMzBPSfuasu2}{Week 11 lab}, I have made some changes there, further I will give differences in more details:\\
+\textbf{This is what I had before:}
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=1]{diff}
+\caption{Num of filters in 1st convolution layer I set as 28.
+In the second - 56.
+\textbf{Number of fully connected layers} = 3. 
+\textbf{Input channels} = 1024, 250, 100
+\textbf{Output channels} = 250, 100, 10}
+\label{fig:diff}
+\end{figure}\\ 
+\\
+\\
+
+\textbf{This is what I have now:}\\
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.8]{new1.png}
+\caption{This is my first class "Feature" here I use 3 convolution layers in order to get more data.As we know the golden rule: "In order to get better accuracy we have to have more data". Then after each convolution step I use batch normalization, also I have added one fully connected layer at the end.}
+\label{fig:new1}
+\end{figure}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=1]{new2.png}
+\caption{ Here I presented my second class, which is "Predictor", in this class I decided to use 3 fully connected layers, with batch normalization, in order to have better result. And also I decided to increase number of filters, just for experiments, but for sure it will give better results and take more time to compile. }
+\label{fig:new2}
+\end{figure}
+The activation function given is the baseline is ReLu (Rectified Linear Unit) is the most used activation function in the world right now. Since it is used in almost all the convolutional neural networks or deep learning.
+
+
+\section{Hyper-parameters, tuning HPs:}
+The network topology is shown in Fig.7. The other hyper-parameters are decided on the validation splits. The learning rate is set to 0.05 in SVHN $\leftrightarrow$MNIST. The batch size for training $F_t$, $F$ is set as 128, the batch-size for training $F_1$, $F_2$, $F$ is set as 64.
+
+\section{Visualization}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale = 0.095 ]{latent.png}
+\caption{\citep{one} This can be divided into three parts: An encoder, a discriminator, and a classifier. The encoder translates the images (i.e., the X space) to embed-dings in the latent space (i.e., the Z space). In the latent space, each group of embed-dings is marked by either  $S_i$  or  $M_i$ , where i is the label of the image, and the prefix letter denotes whether it is from MNIST $(M)$ or SVHN $(S)$. }
+\label{fig:latent}
+\end{figure}
+
+\subsection{Latent space - before training}
+\begin{wrapfigure}{l}{0.4\textwidth}
+\includegraphics[width=1\linewidth]{test.png} 
+\caption{Latent space visualization before training}
+\label{fig:wrapfig}
+\end{wrapfigure}
+--\newline
+The latent space is the space in which the data lies in the bottleneck layer.\citep{six}
+
+Figure 7 illustrates the latent space before training. As we may observe mostly data are split which is normal case.
+\clearpage
+
+\subsection{Latent space - before DA}
+\begin{wrapfigure}{l}{0.4\textwidth}
+\includegraphics[width=1\linewidth]{train.png} 
+\caption{Latent space visualization before DA}
+\label{fig:wrapfig}
+\end{wrapfigure}
+--\newline
+Figure 8 illustrates the latent space before domain adaptation. The heat map image here is pretty much the same but with more data.
+
+We can already see that some numbers are roughly clustered together. That’s because the dataset is really simple, and we can use simple heuristics on pixels to classify the samples. Look how there’s no cluster for the digits 8, 5, 7 and 3, that’s because they are all made of the same pixels, and only minor changes differentiates them.
+
+
+--\newline
+--\newline
+--\newline
+--\newline
+--\newline
+\subsection{Latent space - after DA}
+\begin{wrapfigure}{l}{0.4\textwidth}
+\includegraphics[width=1.2\linewidth]{Latent_Plot.png} 
+\caption{Latent space visualization after DA}
+\label{fig:wrapfig}
+\end{wrapfigure}
+--\newline
+Generation model generates new data by sampling from an “area” instead of only being able to generate already seen data corresponding to the particular fixed encoded points. 
+
+Figure 9 illustrates the t-SNE plot after domain adaptation,as we can see the data is split enough, which means DA was successfully applied.
+
+These visualizations help understand what the network is learning. From there, we can exploit the latent space for clustering, compression, and many other applications.
+\clearpage
+
+\section{Accuracy - with plots}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale = 0.2 ]{acc.png}
+\caption{Here we may see the final results of our work. On the \textbf{left} heatmap represents the accuracy plot of svhn-train $\rightarrow$ svhn-train which is also clled validation, to see if our model is overfitting. On the \textbf{middle} heatmap represents the accuracy plot of svhn-train $\rightarrow$ svhn-test. And on the \textbf{right} hand side svhn-train $\rightarrow$ mnist-test   }
+\label{fig:acc}
+\end{figure}
+
+
+\section{Conclusion}
+Similarly to many
+previous shallow and deep DA techniques, the adaptation is achieved through aligning the
+distributions of features across the two domains. However, unlike previous approaches, the
+alignment is accomplished through standard back-propagation training.
+\subsection{What did I learn from the results?}
+I have learned a lot about domain adaptation in general, about VAE and GANs. 
+Also, since we have proposed domain adaptation method for unsupervised domain,
+which is simply implemented. We aimed to learn discriminative representations by utilizing pseudo-labels assigned to unlabeled target samples. 
+\subsection{Were I would be able to solve domain gap? }
+The first place where we need domain GAP is the obvious one. Sometimes we simply want to deal with a domain. For example if we want to compute the size of the group $D_12$, we had better be able to represent this group in a way that the Size function can understand.
+\subsection{What can be improved to get better results?}
+I have presented a general work for unsupervised domain adaptation. The shown framework has two limitations. \textbf{First}, the translation
+model is uni-modal due to the Gaussian latent space assumption. \textbf{Second}, training could be unstable
+due to the saddle point searching problem. We plan to address these issues in the future work.
+
+\section{Link to the Google Co-laboratory}
+Further, to see the all work done and implementation please refer to the Google Co-laboratory, the link is \href{https://colab.research.google.com/drive/1hHlQvUjr4gjxPlGRlX0VyqmN7rcThc1E}{HERE} 
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
